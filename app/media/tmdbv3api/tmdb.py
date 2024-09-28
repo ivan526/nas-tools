@@ -149,8 +149,8 @@ class TMDb(object):
 
     @staticmethod
     @ttl_lru(seconds=60 * 60 * 6, maxsize=REQUEST_CACHE_MAXSIZE)
-    def ttl_cached_request(method, url, data, proxies):
-        return requests.request(method, url, data=data, proxies=eval(proxies), verify=False, timeout=10)
+    def ttl_cached_request(method, url, data, headers, proxies):
+        return requests.request(method, url, data=data, headers=headers, proxies=eval(proxies), verify=False, timeout=10)
 
     def cache_clear(self):
         return self.cached_request.cache_clear()
@@ -170,8 +170,13 @@ class TMDb(object):
             self.language,
         )
 
+        headers = {
+            "accept": "application/json",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxN2EzYWY0NDFjMWIxY2ZmNzc1ZjliNGViNDQxZmYxZiIsIm5iZiI6MTcyNzUzODI3NS43MTE5MjIsInN1YiI6IjYzNzQ1YjViODczZjAwMDBjOTRkNDdiYyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.nHNjCbS_3PbusNXJCVx946yZ36T4GszXqZokK2pOd5g"
+        }
+
         if self.cache and self.obj_cached and call_cached and method != "POST":
-            req = self.ttl_cached_request(method, url, data, self.proxies)
+            req = self.ttl_cached_request(method, url, data, headers, self.proxies)
         else:
             req = self._session.request(method, url, data=data, proxies=eval(self.proxies), timeout=10, verify=False)
 
